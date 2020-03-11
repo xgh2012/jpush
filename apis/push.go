@@ -19,6 +19,8 @@ type Push struct {
 	Message      *pushapi.Message
 	Options      *pushapi.Options
 	JpushResult  *pushapi.JpushResult
+	httpClient   *jpushcommon.HTTPClient
+	Debug        bool
 }
 type Body struct {
 	Platform        interface{} `json:"platform"`
@@ -51,6 +53,13 @@ func (api *Push) Init(title, alert string) *Push {
 	api.Options = &pushapi.Options{JpushResult: TmpRes, ApnsProduction: false}
 	api.JpushResult = TmpRes
 
+	api.httpClient = jpushcommon.NewClient(api.Debug)
+	return api
+}
+
+//设置debug
+func (api *Push) SetDebug(debug bool) *Push {
+	api.Debug = debug
 	return api
 }
 
@@ -157,8 +166,7 @@ func (api *Push) DoPush(client *jpush.Client) {
 	}
 	body := api.GetBody()
 
-	c := jpushcommon.NewClient(true)
-	resp, err := c.PostJson(jpushcommon.PUSHAPI, body, client.Headers)
+	resp, err := api.httpClient.PostJson(jpushcommon.PUSHAPI, body, client.Headers)
 
 	response := jpushcommon.Response{
 		Resp: resp,
