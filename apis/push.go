@@ -175,7 +175,15 @@ func (api *Push) DoPush(client *jpush.Client) {
 		api.JpushResult.Message = err.Error()
 		return
 	}
-
+	if response.StatusCode != 200 {
+		api.JpushResult.Flag = false
+		msg := "未知错误"
+		if rst.Error.Message != "" {
+			msg = rst.Error.Message
+		}
+		api.JpushResult.Message = msg
+		return
+	}
 	api.JpushResult.Limit = response.RateLimitInfo
 	api.JpushResult.Result = rst
 }
